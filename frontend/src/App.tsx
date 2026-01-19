@@ -4,6 +4,7 @@ import React from 'react';
 import { useHormoneResults } from './hooks/useHormoneResults';
 import { Loading } from './components/Loading';
 import { ErrorDisplay } from './components/ErrorDisplay';
+import { HormoneDetails } from './components/HormoneDetails';
 
 const FILTER_OPTIONS = [
   { value: "ALL", label: "All Results" },
@@ -14,11 +15,24 @@ const FILTER_OPTIONS = [
 function App() {
   const { results, loading, error } = useHormoneResults()
   const [statusFilter, setStatusFilter] = React.useState<string>("ALL")
+  const [expandedRows, setExpandedRows] = React.useState<Set<number>>(new Set())
 
   const filteredResults = useMemo(() => {
     if (statusFilter === "ALL") return results;
     return results.filter(result => result.status === statusFilter);
   }, [results, statusFilter]);
+
+  const toggleExpanded = (resultId: number) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(resultId)) {
+        newSet.delete(resultId)
+      } else {
+        newSet.add(resultId)
+      }
+      return newSet
+    })
+  }
 
   if (loading) {
     return (
@@ -67,16 +81,38 @@ function App() {
           <p>result id</p>
           <p>user id</p>
           <p>status</p>
+          <p></p>
         </div>
         <div className="resultsList">
           {
             filteredResults.map(result => {
-
+              const isExpanded = expandedRows.has(result.id)
+              const hasOutOfRange = result.outOfRangeHormones.length > 0
+              
               return (
-                <div className="resultsItem" key={result.id}>
+                <div key={result.id}>
+                  <div 
+                    className={`resultsItem ${hasOutOfRange ? 'clickableRow' : 'nonClickableRow'}`}
+                    onClick={() => hasOutOfRange && toggleExpanded(result.id)}
+                  >
                     <p>{result.id}</p>
                     <p>{result.userId}</p>
-                    <p>{result.status}</p>
+                    <p>
+                      <span className={`statusPill ${
+                        result.status === 'IN RANGE' ? 'statusInRange' : 
+                        result.status === 'NOT IN RANGE' ? 'statusNotInRange' : 
+                        'statusUnknown'
+                      }`}>
+                        {result.status}
+                      </span>
+                    </p>
+                    <div className="expandArrow">
+                      {hasOutOfRange && (isExpanded ? "▼" : "▶")}
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <HormoneDetails outOfRangeHormones={result.outOfRangeHormones} />
+                  )}
                 </div>
               )
             })
