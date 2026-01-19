@@ -13,12 +13,12 @@ interface Results {
     status: string;
 }
 
-function isHormoneInRange(hormoneCode: HormoneCode, value: number): boolean {
+export function isHormoneInRange(hormoneCode: HormoneCode, value: number): boolean {
     const range = HORMONE_RANGES[hormoneCode];
     return value >= range.min && value <= range.max;
 }
 
-function calculateResultStatus(hormoneResults: HormoneResults[]): string {
+export function calculateResultStatus(hormoneResults: HormoneResults[]): string {
     if (hormoneResults.length === 0) return "UNKNOWN";
     
     const allInRange = hormoneResults.every(hormone => {
