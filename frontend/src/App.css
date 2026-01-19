@@ -40,3 +40,27 @@
 .read-the-docs {
   color: #888;
 }
+
+.filterControls {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.filterControls select {
+  padding: 5px;
+}
+
+.resultsCount {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-weight: 500;
+}

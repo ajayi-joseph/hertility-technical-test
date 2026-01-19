@@ -1,44 +1,66 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import './App.css'
 import React from 'react';
+import { useHormoneResults } from './hooks/useHormoneResults';
+import { Loading } from './components/Loading';
+import { ErrorDisplay } from './components/ErrorDisplay';
 
-interface HormoneResults {
-  code: string;
-  units: string;
-  value: number;
-}
-
-interface Results {
-  id: number;
-  userId: number;
-  hormoneResults: Array<HormoneResults>;
-}
-
-const fetchResults = async () => {
-  try {
-    const res = await fetch("http://localhost:52863/results")
-    const json = await res.json()
-    return json as Results[]
-  } catch (error) {
-    console.error(error)
-  }
-  return []
-}
+const FILTER_OPTIONS = [
+  { value: "ALL", label: "All Results" },
+  { value: "IN RANGE", label: "IN RANGE" },
+  { value: "NOT IN RANGE", label: "NOT IN RANGE" }
+] as const;
 
 function App() {
+  const { results, loading, error } = useHormoneResults()
+  const [statusFilter, setStatusFilter] = React.useState<string>("ALL")
 
-  const [results, setResults] = React.useState<Results[]>([])
+  const filteredResults = useMemo(() => {
+    if (statusFilter === "ALL") return results;
+    return results.filter(result => result.status === statusFilter);
+  }, [results, statusFilter]);
 
-  useEffect(() => {
-    fetchResults().then(results => {
-      setResults(results)
-    })
-  }, [])
+  if (loading) {
+    return (
+      <div>
+        <h2>Hertility admin dashboard</h2>
+        <Loading message="Loading hormone results..." />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h2>Hertility admin dashboard</h2>
+        <ErrorDisplay message={error} />
+      </div>
+    )
+  }
 
   return (
     <div> 
       <h2>Hertility admin dashboard</h2>
       <h1>Hormone results</h1>
+
+      <div className="filterControls">
+        <label htmlFor="statusFilter">Filter by status: </label>
+        <select 
+          id="statusFilter"
+          value={statusFilter} 
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          {FILTER_OPTIONS.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="resultsCount">
+        Showing {filteredResults.length} of {results.length} results
+      </div>
 
       <div className="results">
         <div className="resultsHeader">
@@ -48,13 +70,13 @@ function App() {
         </div>
         <div className="resultsList">
           {
-            results.map(result => {
+            filteredResults.map(result => {
 
               return (
                 <div className="resultsItem" key={result.id}>
                     <p>{result.id}</p>
                     <p>{result.userId}</p>
-                    <p></p>
+                    <p>{result.status}</p>
                 </div>
               )
             })
