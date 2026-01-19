@@ -1,39 +1,43 @@
 import { useEffect, useState } from 'react';
 import { Results } from '../types/results';
 
-const fetchResults = async () => {
+const fetchResults = async (status?: string) => {
   try {
-    const res = await fetch("http://localhost:52863/results")
-    const json = await res.json()
-    return json as Results[]
+    const url = new URL("http://localhost:52863/results");
+    if (status) {
+      url.searchParams.append('status', status);
+    }
+    const res = await fetch(url.toString());
+    const json = await res.json();
+    return json as Results[];
   } catch (error) {
-    console.error(error)
-    throw error
+    console.error(error);
+    throw error;
   }
-}
+};
 
-export const useHormoneResults = () => {
-  const [results, setResults] = useState<Results[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export const useHormoneResults = (status?: string) => {
+  const [results, setResults] = useState<Results[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadResults = async () => {
       try {
-        setLoading(true)
-        setError(null)
-        const data = await fetchResults()
-        setResults(data)
+        setLoading(true);
+        setError(null);
+        const data = await fetchResults(status);
+        setResults(data);
       } catch (err) {
-        setError('Failed to load hormone results')
-        console.error('Error fetching results:', err)
+        setError('Failed to load hormone results');
+        console.error('Error fetching results:', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadResults()
-  }, [])
+    loadResults();
+  }, [status]);
 
-  return { results, loading, error }
-}
+  return { results, loading, error };
+};

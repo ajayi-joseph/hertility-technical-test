@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import './App.css'
 import React from 'react';
 import { useHormoneResults } from './hooks/useHormoneResults';
@@ -7,20 +6,15 @@ import { ErrorDisplay } from './components/ErrorDisplay';
 import { HormoneDetails } from './components/HormoneDetails';
 
 const FILTER_OPTIONS = [
-  { value: "ALL", label: "All Results" },
-  { value: "IN RANGE", label: "IN RANGE" },
-  { value: "NOT IN RANGE", label: "NOT IN RANGE" }
+  { value: '', label: 'All Results' },
+  { value: 'IN RANGE', label: 'IN RANGE' },
+  { value: 'NOT IN RANGE', label: 'NOT IN RANGE' }
 ] as const;
 
 function App() {
-  const { results, loading, error } = useHormoneResults()
-  const [statusFilter, setStatusFilter] = React.useState<string>("ALL")
-  const [expandedRows, setExpandedRows] = React.useState<Set<number>>(new Set())
-
-  const filteredResults = useMemo(() => {
-    if (statusFilter === "ALL") return results;
-    return results.filter(result => result.status === statusFilter);
-  }, [results, statusFilter]);
+  const [statusFilter, setStatusFilter] = React.useState<string>('');
+  const { results, loading, error } = useHormoneResults(statusFilter || undefined);
+  const [expandedRows, setExpandedRows] = React.useState<Set<number>>(new Set());
 
   const toggleExpanded = (resultId: number) => {
     setExpandedRows(prev => {
@@ -73,7 +67,7 @@ function App() {
       </div>
 
       <div className="resultsCount">
-        Showing {filteredResults.length} of {results.length} results
+        Showing {results.length} results{statusFilter ? ` with status: ${statusFilter}` : ''}
       </div>
 
       <div className="results">
@@ -85,7 +79,7 @@ function App() {
         </div>
         <div className="resultsList">
           {
-            filteredResults.map(result => {
+            results.map(result => {
               const isExpanded = expandedRows.has(result.id)
               const hasOutOfRange = result.outOfRangeHormones.length > 0
               

@@ -54,7 +54,7 @@ export function getOutOfRangeHormones(hormoneResults: HormoneResults[]): OutOfRa
 }
 
 // this would normally be a database query - you don't need to change this function
-export async function fetchResults() {
+export async function fetchResults(statusFilter?: string) {
     const json: { default: Omit<Results, 'status' | 'outOfRangeHormones'>[] } = await import("../data/results.json", {
         assert: { type: "json" },
     });
@@ -65,6 +65,10 @@ export async function fetchResults() {
         status: calculateResultStatus(result.hormoneResults),
         outOfRangeHormones: getOutOfRangeHormones(result.hormoneResults)
     }));
+    
+    if (statusFilter) {
+        return resultsWithStatus.filter(result => result.status === statusFilter);
+    }
     
     return resultsWithStatus;
 }
