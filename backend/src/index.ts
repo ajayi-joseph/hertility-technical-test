@@ -19,6 +19,7 @@ function main() {
     });
 
    // api routers
+   app.use("/", router);
    app.use("/results", resultsRouter); 
 
     app.listen(PORT, HOST, () => {
