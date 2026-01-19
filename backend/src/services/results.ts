@@ -1,3 +1,5 @@
+import { HORMONE_RANGES } from "../data/hormoneRanges";
+
 interface HormoneResults {
     code: string;
     units: string;
